@@ -54,6 +54,9 @@ class HistoryWindow(QWidget):
         item.setData(Qt.ItemDataRole.UserRole, text)
         item.setToolTip(text)
         self._list.insertItem(0, item)
+        # Cap history to prevent unbounded memory growth
+        while self._list.count() > 200:
+            self._list.takeItem(self._list.count() - 1)
 
     def _copy_item(self, item):
         QApplication.clipboard().setText(item.data(Qt.ItemDataRole.UserRole))

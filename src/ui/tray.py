@@ -38,7 +38,7 @@ STATES = {
 
 
 class TrayIcon(QSystemTrayIcon):
-    def __init__(self, on_settings, on_history, on_quit, parent=None):
+    def __init__(self, on_settings, on_history, on_commands, on_quit, parent=None):
         super().__init__(parent)
         self._icons = {state: _make_icon(color) for state, color in STATES.items()}
         self.setIcon(self._icons['idle'])
@@ -48,6 +48,7 @@ class TrayIcon(QSystemTrayIcon):
         menu.addAction('FlowType').setEnabled(False)
         menu.addSeparator()
         menu.addAction('History...', on_history)
+        menu.addAction('Commands...', on_commands)
         menu.addAction('Settings...', on_settings)
         menu.addSeparator()
         menu.addAction('Quit', on_quit)
