@@ -92,6 +92,51 @@ dpkg-deb --build flowtype_1.1.0_amd64 ../flowtype_1.2.0_amd64.deb
 | `config.py` | JSON config at `~/.config/flowtype/config.json` |
 | `ui/` | PyQt6 tray, indicator, settings, history |
 
+## Running from terminal
+
+After installing the `.deb`, the `flowtype` command is available system-wide:
+
+```bash
+# Normal launch (starts in system tray)
+flowtype
+
+# Launch in background, keep terminal free
+flowtype &
+
+# Launch and see live transcription log in terminal
+flowtype
+# Output example:
+# [flowtype] → "текст который вы продиктовали"
+# [flowtype] No speech detected.
+```
+
+To run from source without installing:
+
+```bash
+cd flowtype/src
+source venv/bin/activate
+python flowtype.py
+```
+
+To add to autostart (runs on login):
+
+```bash
+mkdir -p ~/.config/autostart
+cat > ~/.config/autostart/flowtype.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=FlowType
+Exec=flowtype
+Hidden=false
+X-GNOME-Autostart-enabled=true
+EOF
+```
+
+## Credits
+
+Developed by [Claude](https://claude.ai) (Anthropic AI).
+Inspired and driven by **vitiodev**.
+
 ## License
 
 MIT
