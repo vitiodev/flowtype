@@ -92,6 +92,29 @@ dpkg-deb --build flowtype_1.1.0_amd64 ../flowtype_1.2.0_amd64.deb
 | `config.py` | JSON config at `~/.config/flowtype/config.json` |
 | `ui/` | PyQt6 tray, indicator, settings, history |
 
+## Voice Commands
+
+FlowType can execute shell commands triggered by voice. Open **Commands** from the tray icon to manage them.
+
+Each command has:
+
+| Field | Description |
+|-------|-------------|
+| **Voice phrase** | What you say to trigger the command (e.g. `открой терминал`) |
+| **Shell command** | What gets executed (e.g. `gnome-terminal`, `xdg-open https://google.com`) |
+| **Exact match** | Off — phrase can appear anywhere in the transcription; On — must match exactly |
+| **Run in terminal** | Paste the command into the active terminal window instead of running silently |
+
+Commands are stored in `~/.config/flowtype/commands.json`. A set of default Russian-language commands is included out of the box:
+
+```
+"открой терминал"        → gnome-terminal
+"открой браузер"         → xdg-open https://google.com
+"открой файловый менеджер" → nautilus
+```
+
+When a phrase is recognised, the shell command runs **instead of** typing the transcribed text.
+
 ## Running from terminal
 
 After installing the `.deb`, the `flowtype` command is available system-wide:
@@ -139,4 +162,4 @@ Inspired and driven by **vitiodev**.
 
 ## License
 
-MIT
+MIT — open source, free to use, modify, and distribute.
