@@ -1,7 +1,5 @@
 # FlowType
 
-![FlowType banner](banner.svg)
-
 Voice dictation for Ubuntu 24/25. Hold a hotkey — speak — release. Text is transcribed offline and typed at the cursor.
 
 Works on both **X11** and **Wayland**.
