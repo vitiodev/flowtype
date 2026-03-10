@@ -1,0 +1,5 @@
+src/venv/
+src/__pycache__/
+src/ui/__pycache__/
+*.pyc
+*.pyo
