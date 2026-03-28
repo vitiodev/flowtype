@@ -13,6 +13,7 @@ class Recorder:
         self._frames = []
         self._recording = False
         self._lock = threading.Lock()
+        self.amplitude_callback = None
         self._stream = self._open_stream()
 
     def _open_stream(self):
@@ -53,6 +54,9 @@ class Recorder:
         if self._recording:
             with self._lock:
                 self._frames.append(indata.copy())
+            cb = self.amplitude_callback
+            if cb is not None:
+                cb(indata.copy())
 
     def start(self):
         with self._lock:

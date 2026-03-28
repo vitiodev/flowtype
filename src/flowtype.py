@@ -27,6 +27,7 @@ class FlowType(QObject):
     _sig_record_stopped  = pyqtSignal()
     _sig_text_ready      = pyqtSignal(str)
     _sig_error           = pyqtSignal(str)
+    _sig_amplitude       = pyqtSignal(object)  # list of N_BANDS floats
 
     def __init__(self, app: QApplication):
         super().__init__()
@@ -58,6 +59,8 @@ class FlowType(QObject):
         self._sig_record_stopped.connect(self._ui_on_record_stopped)
         self._sig_text_ready.connect(self._ui_on_text_ready)
         self._sig_error.connect(self._ui_on_error)
+        self._sig_amplitude.connect(self.indicator.push_amplitude)
+        self._setup_amplitude_callback()
 
         # Load Whisper model in background
         threading.Thread(target=self._load_model, daemon=True).start()
@@ -77,6 +80,53 @@ class FlowType(QObject):
             on_release = self._on_release,
         )
         self.hotkey.start()
+
+    def _setup_amplitude_callback(self):
+        import time as _time
+        import numpy as np
+        from ui.indicator import N_BANDS
+
+        _last = [0.0]
+        _buf = [np.zeros(2048, dtype='float32')]
+        sr = self.cfg.get('sample_rate', 16000)
+        sig = self._sig_amplitude
+
+        def _cb(indata: np.ndarray):
+            now = _time.monotonic()
+            if now - _last[0] < 0.040:
+                return
+            _last[0] = now
+
+            chunk = indata[:, 0] if indata.ndim > 1 else indata.flatten()
+            buf = _buf[0]
+            n = len(chunk)
+            if n >= len(buf):
+                _buf[0] = chunk[-len(buf):].astype('float32')
+            else:
+                _buf[0] = np.roll(buf, -n)
+                _buf[0][-n:] = chunk
+
+            window = np.hanning(len(_buf[0]))
+            spectrum = np.abs(np.fft.rfft(_buf[0] * window))
+            n_fft = len(spectrum)
+
+            # Log-spaced bands 80 Hz – 8000 Hz
+            lo_bin = max(1, int(80 * len(_buf[0]) / sr))
+            hi_bin = min(n_fft - 1, int(8000 * len(_buf[0]) / sr))
+            edges = np.logspace(np.log10(lo_bin), np.log10(hi_bin), N_BANDS + 1)
+            edges = np.clip(edges.astype(int), 1, n_fft - 1)
+
+            bands = []
+            for i in range(N_BANDS):
+                lo, hi = edges[i], edges[i + 1]
+                if hi <= lo:
+                    hi = lo + 1
+                energy = float(np.sqrt(np.mean(spectrum[lo:hi] ** 2)))
+                bands.append(min(energy / 2.0, 1.0))
+
+            sig.emit(bands)
+
+        self.recorder.amplitude_callback = _cb
 
     # ------------------------------------------------------------------ #
     #  Hotkey callbacks  (called from evdev thread)                        #
@@ -175,6 +225,7 @@ class FlowType(QObject):
                 device            = cfg.get('audio_device'),
                 silence_threshold = cfg.get('silence_threshold', 0.01),
             )
+            self._setup_amplitude_callback()
         # Reload transcriber if any transcription-related setting changed
         _transcriber_keys = ('transcription_mode', 'model', 'device', 'language',
                              'api_url', 'api_key', 'api_model')
