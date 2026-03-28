@@ -8,7 +8,7 @@ Works on both **X11** and **Wayland**.
 
 ## Features
 
-- **Offline** — speech recognition runs locally via [faster-whisper](https://github.com/SYSTRAN/faster-whisper), no cloud, no subscription
+- **Offline or cloud** — local transcription via [faster-whisper](https://github.com/SYSTRAN/faster-whisper), or any OpenAI-compatible API (OpenAI, Groq, etc.)
 - **Low latency** — persistent audio stream, model stays in memory; CUDA gives ~0.7 s for 17 s of speech
 - **Any hotkey** — single key or combo (e.g. `Right Shift`, `Ctrl+Alt`, `Ctrl+F9`)
 - **Smart injection** — clipboard-based paste with automatic terminal detection (uses `Ctrl+Shift+V` in terminal emulators)
@@ -26,7 +26,7 @@ Works on both **X11** and **Wayland**.
 Download the latest `.deb` from [Releases](https://github.com/vitiodev/flowtype/releases) and install:
 
 ```bash
-sudo dpkg -i flowtype_1.2.0_amd64.deb
+sudo dpkg -i flowtype_1.3.3_amd64.deb
 sudo apt-get install -f   # fix any missing dependencies
 ```
 
@@ -49,12 +49,33 @@ The app starts in the system tray.
 | Option | Default | Description |
 |--------|---------|-------------|
 | Hotkey | `Right Shift` | Key or combo to hold while speaking |
-| Model | `base` | Whisper model size: `tiny` / `base` / `small` / `medium` / `large` |
+| Mode | `Local` | `Local` (faster-whisper) or `API` (OpenAI-compatible) |
+| Model | `base` | Local: `tiny` / `base` / `small` / `medium` / `large` |
 | Language | auto | Force a language (e.g. `ru`, `en`) or leave auto |
-| Device | `cpu` | `cpu` or `cuda` (requires NVIDIA GPU) |
+| Device | `cpu` | `cpu` or `cuda` (requires NVIDIA GPU) — local mode only |
 | Inject method | auto | `clipboard` or `ydotool` (Wayland) |
 
 Larger models are more accurate but slower to load and transcribe.
+
+## API transcription (Groq / OpenAI)
+
+Switch **Mode → API** in Settings to transcribe via a cloud API instead of running a local model.
+
+| Field | Description |
+|-------|-------------|
+| **API URL** | Endpoint base URL (without `/audio/transcriptions`) |
+| **API Key** | Your API key |
+| **Model name** | Model to request (e.g. `whisper-1`, `whisper-large-v3`) |
+
+**Groq** offers a free tier with fast `whisper-large-v3` transcription:
+
+| Field | Value |
+|-------|-------|
+| API URL | `https://api.groq.com/openai/v1` |
+| API Key | Get one at [console.groq.com/keys](https://console.groq.com/keys) |
+| Model name | `whisper-large-v3` |
+
+Any OpenAI-compatible server works (local [whisper.cpp](https://github.com/ggerganov/whisper.cpp) server, OpenAI, etc.).
 
 ## GPU acceleration (CUDA)
 
@@ -77,7 +98,7 @@ To build the `.deb` package:
 
 ```bash
 cd deb
-dpkg-deb --build flowtype_1.1.0_amd64 ../flowtype_1.2.0_amd64.deb
+dpkg-deb --build flowtype_1.1.0_amd64 ../flowtype_1.3.3_amd64.deb
 ```
 
 ## Architecture
@@ -87,7 +108,7 @@ dpkg-deb --build flowtype_1.1.0_amd64 ../flowtype_1.2.0_amd64.deb
 | `flowtype.py` | Main app, Qt signals between threads |
 | `hotkey.py` | evdev keyboard listener, combo hotkeys |
 | `recorder.py` | Persistent `sounddevice.InputStream` |
-| `transcriber.py` | faster-whisper wrapper |
+| `transcriber.py` | faster-whisper wrapper + OpenAI-compatible API client |
 | `injector.py` | Text injection via clipboard (xclip + xdotool) |
 | `config.py` | JSON config at `~/.config/flowtype/config.json` |
 | `ui/` | PyQt6 tray, indicator, settings, history |

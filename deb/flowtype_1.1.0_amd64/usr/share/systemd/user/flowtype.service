@@ -1,0 +1,14 @@
+[Unit]
+Description=FlowType voice dictation
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/flowtype
+Restart=on-failure
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+PassEnvironment=DISPLAY WAYLAND_DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=FlowType
+Comment=Voice dictation for Wayland
+Exec=/usr/bin/flowtype
+Icon=audio-input-microphone
+Categories=Utility;Accessibility;
+X-GNOME-Autostart-enabled=true
+NoDisplay=false

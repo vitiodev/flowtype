@@ -1,0 +1,25 @@
+#!/bin/bash
+VENV=/usr/lib/flowtype/venv
+PYTHON=$VENV/bin/python
+
+# Add CUDA libraries installed via pip (nvidia-cublas-cu12, nvidia-cudnn-cu12)
+# to LD_LIBRARY_PATH so ctranslate2 can find them when device=cuda
+for pkg in nvidia.cublas nvidia.cudnn; do
+    lib_dir=$($PYTHON -c "
+import sys
+try:
+    import importlib
+    mod = importlib.import_module('$pkg')
+    import os
+    lib = os.path.join(list(mod.__path__)[0], 'lib')
+    if os.path.isdir(lib):
+        print(lib)
+except Exception:
+    pass
+" 2>/dev/null)
+    if [ -n "$lib_dir" ]; then
+        export LD_LIBRARY_PATH="$lib_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    fi
+done
+
+exec "$PYTHON" /usr/lib/flowtype/flowtype.py "$@"

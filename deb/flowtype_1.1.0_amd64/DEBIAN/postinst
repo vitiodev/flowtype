@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e
+
+INSTALL_DIR=/usr/lib/flowtype
+VENV_DIR=$INSTALL_DIR/venv
+
+echo "[flowtype] Installing Python dependencies..."
+python3 -m venv "$VENV_DIR"
+"$VENV_DIR/bin/pip" install -q --upgrade pip
+"$VENV_DIR/bin/pip" install -q -r "$INSTALL_DIR/requirements.txt"
+
+# Determine the real user (not root)
+REAL_USER="${SUDO_USER:-}"
+if [ -z "$REAL_USER" ]; then
+    REAL_USER=$(logname 2>/dev/null || true)
+fi
+if [ -z "$REAL_USER" ]; then
+    REAL_USER=$(getent passwd | awk -F: '$3 >= 1000 && $3 < 65534 {print $1; exit}')
+fi
+
+if [ -n "$REAL_USER" ]; then
+    echo "[flowtype] Adding $REAL_USER to 'input' group..."
+    usermod -aG input "$REAL_USER" || true
+else
+    echo "[flowtype] WARNING: Could not determine user. Add manually:"
+    echo "  sudo usermod -aG input \$USER && newgrp input"
+fi
+
+# Allow ydotoold without password
+SUDOERS_FILE=/etc/sudoers.d/flowtype-ydotoold
+echo "# Allow flowtype users to run ydotoold without password" > "$SUDOERS_FILE"
+echo "%input ALL=(ALL) NOPASSWD: /usr/bin/ydotoold" >> "$SUDOERS_FILE"
+chmod 440 "$SUDOERS_FILE"
+echo "[flowtype] Configured passwordless ydotoold for 'input' group."
+
+# Enable systemd user service if systemd is running
+if [ -n "$REAL_USER" ] && systemctl is-system-running --quiet 2>/dev/null; then
+    USER_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
+    SYSTEMD_USER_DIR="$USER_HOME/.config/systemd/user"
+    mkdir -p "$SYSTEMD_USER_DIR"
+    cp /usr/share/systemd/user/flowtype.service "$SYSTEMD_USER_DIR/"
+    su - "$REAL_USER" -c "systemctl --user daemon-reload && systemctl --user enable flowtype" 2>/dev/null || true
+    echo "[flowtype] Systemd user service enabled."
+fi
+
+echo ""
+echo "[flowtype] Installation complete!"
+echo "  Re-login for group changes to take effect, then run: flowtype"
+echo "  Or enable autostart via: systemctl --user enable --now flowtype"

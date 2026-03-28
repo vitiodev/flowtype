@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+# Stop service for all users
+for USER_HOME in /home/*; do
+    USER=$(basename "$USER_HOME")
+    su - "$USER" -c "systemctl --user disable --now flowtype 2>/dev/null || true" 2>/dev/null || true
+done
+
+# Remove sudoers rule
+rm -f /etc/sudoers.d/flowtype-ydotoold
+
+echo "[flowtype] Removed."

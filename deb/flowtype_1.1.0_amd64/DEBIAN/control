@@ -1,0 +1,11 @@
+Package: flowtype
+Version: 1.3.3
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: python3 (>= 3.10), python3-venv, python3-pip, ydotool, wl-clipboard, xdotool, portaudio19-dev, ffmpeg, libxcb-cursor0
+Maintainer: Victor <victor@localhost>
+Description: Voice dictation for Ubuntu 24/25 (Wayland + X11)
+ Hold Right Shift (or configure any hotkey) to record voice, release to
+ transcribe and type. Supports Wayland (ydotool) and X11 (xdotool).
+ Uses faster-whisper for offline speech recognition.
