@@ -103,9 +103,9 @@ class Indicator(QWidget):
 
     def _position(self):
         self.adjustSize()
-        screen = QApplication.primaryScreen().availableGeometry()
+        screen = QApplication.primaryScreen().geometry()
         x = screen.x() + (screen.width() - self.width()) // 2
-        y = screen.y() + screen.height() - self.height() - 8
+        y = screen.y() + screen.height() - self.height() - 60
         self.move(x, y)
 
     def push_amplitude(self, bands):
