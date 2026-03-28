@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout
+from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout
 from PyQt6.QtCore import Qt, QTimer, QSize
 from PyQt6.QtGui import QPainter, QColor
 
@@ -103,7 +103,7 @@ class Indicator(QWidget):
 
     def _position(self):
         self.adjustSize()
-        screen = self.screen().geometry()
+        screen = QApplication.primaryScreen().geometry()
         x = (screen.width() - self.width()) // 2
         y = screen.height() - self.height() - 24
         self.move(x, y)

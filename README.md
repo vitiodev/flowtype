@@ -26,7 +26,7 @@ Works on both **X11** and **Wayland**.
 Download the latest `.deb` from [Releases](https://github.com/vitiodev/flowtype/releases) and install:
 
 ```bash
-sudo dpkg -i flowtype_1.4.3_amd64.deb
+sudo dpkg -i flowtype_1.4.4_amd64.deb
 sudo apt-get install -f   # fix any missing dependencies
 ```
 
@@ -98,7 +98,7 @@ To build the `.deb` package:
 
 ```bash
 cd deb
-dpkg-deb --build flowtype_1.1.0_amd64 ../flowtype_1.4.3_amd64.deb
+dpkg-deb --build flowtype_1.1.0_amd64 ../flowtype_1.4.4_amd64.deb
 ```
 
 ## Architecture
